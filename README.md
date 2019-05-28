@@ -1,12 +1,15 @@
-# POBC_automated_test
+# POBC automated test project
 
 ## Description
 
 A POBC automated test based on Raspberry pie
 
+Architecture
+![Architecture](docs/pobc-autotest.png "POBC automated test project")
+
 ## What we have
 
-* A command line automated test control.
+* A command line for automated test control.
 * A web service for automated test control.
 * A general python API for Raspberry pie control.
 
