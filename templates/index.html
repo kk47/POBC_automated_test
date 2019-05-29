@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% block css %}
+  <link rel="stylesheet" href="/static/css/bootstrap-table.min.css">
+{% endblock %}
+{% block container %}
+  <div id="index">
+    <div class="row">
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-header">
+            组件状态
+          </div>
+          <div class="card-body">
+            <div id="volume"></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-header">
+            详细参数
+          </div>
+          <div class="card-body">
+            <div id="distribution"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        最新测试报告
+      </div>
+      <div class="card-body">
+        <table id="boards"></table>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-lg-6">
+        <div class="card">
+          <div class="card-header">
+            通知告警
+          </div>
+          <div class="card-body">
+            <ul class="list-group list-group-flush ">
+              {% for i, t, d in news %}
+                <li class="list-group-item text-truncate"><a
+                        href="/article/{{ i }}">{{ t }}</a><br><span class
+                                                                             ="text-muted">{{ d|date:'Y-m-d' }}</span>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6 pl-lg-2">
+        <div class="card">
+          <div class="card-header">
+            测试进程
+          </div>
+          <div class="card-body">
+            <ul class="list-group list-group-flush ">
+              {% for i, t, d in report %}
+                <li class="list-group-item text-truncate"><a href="/article/{{ i }}">{{ t }}</a><br><span
+                        class="text-muted">{{ d|date:'Y-m-d' }}</span></li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+{% block header %}
+    信息展示
+{% endblock %}
+
+{% block script %}
+  <script src="/static/js/bootstrap-table.min.js"></script>
+  <script src="/static/js/bootstrap-table-zh-CN.min.js"></script>
+  <script>
+    $('#boards').bootstrapTable({
+      url: 'data/',
+      striped: true,
+      toolbar: '#task_crl',
+      toolbarAlign: "right",
+      clickToSelect: true,
+      sortName: 'id',
+      pagination: true,
+      pageSize: 15,
+      pageList: [15, 'All'],
+      columns: [{
+        field: 'time',
+        title: '序号',
+        align: 'center',
+        sortable: true,
+      }, {
+        field: 'level',
+        title: '开始时间',
+        align: 'center',
+        sortable: true,
+      }, {
+        field: 'level',
+        title: '结束时间',
+        align: 'center',
+        sortable: true,
+      }, {
+        field: 'level',
+        title: '负责人',
+        align: 'center',
+        sortable: true,
+      }, {
+        field: 'msg',
+        title: '接口',
+        align: 'center',
+        sortable: true,
+      }, {
+        field: 'isread',
+        title: '测试项目',
+        align: 'center',
+        sortable: true,
+      }, {
+        field: 'isread',
+        title: '测试结果',
+        align: 'center',
+        sortable: true,
+      }, {
+        field: 'operation',
+        title: '编辑',
+        align: 'center',
+        sortable: true,
+        formatter: function (e) {
+          return '<i class="far fa-edit edit" role="button"></i> <i class="far fa-trash-alt delete" role="button"></i>'
+        },
+        events: {
+          "click i.edit": function (e, value, row) {
+            for (v in row) {
+              $('#detail_modal :input[name=' + v + ']').val(row[v]);
+            }
+            $(':input[name=module]').attr('disabled', true);
+            var filter = JSON.parse(row.filter);
+            var html = '';
+            for (v in filter) {
+              html += '<div class="input-group mb-2">\n' +
+                '      <div class="input-group-prepend">\n' +
+                '        <div class="input-group-text">' + v + '</div>\n' +
+                '      </div>\n' +
+                '      <input name="' + v + '" value="' + filter[v] + '" class="form-control" disabled>\n' +
+                '    </div>';
+            }
+
+            $('#filter').html(html);
+            change_data(function () {
+              $('#detail_modal :input[name=chart]').val(row.chart).change();
+              $('#detail_modal :input[name=variable]').val(row.variable);
+            });
+
+            tos = JSON.parse(row.to);
+            for (i in tos) {
+              $(':checkbox[name=mail][value=' + tos[i] + ']').prop('checked', true);
+            }
+
+            $('#detail_modal').modal('show').find('.modal-title').text('编辑规则');
+            $('#submit').off().click(function () {
+              aperate('edit', row.id)
+            });
+          },
+          "click i.delete": function (e, value, row) {
+            aperate('remove', row.id)
+          },
+        }
+      }]
+    });
+  </script>
+{% endblock %}
